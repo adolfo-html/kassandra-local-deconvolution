@@ -1,0 +1,14 @@
+name: kassandra
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy<2
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - lightgbm
+  - networkx
+  - pyyaml
+  - jupyterlab
