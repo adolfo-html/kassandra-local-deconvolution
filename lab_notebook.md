@@ -5,6 +5,7 @@
 Hi! This is a machine learning project I'm doing aimed at studying how the Kassandra ML algorithm is used to help oncology research.
 
 
+
 (1/20)
 
 ### Personal Log
@@ -22,6 +23,8 @@ But like... what am I gonna do??
 I was reading about BostonGene and studied some of their publications. I was really interested in the AI/ML part of their work, because I took courses over those and have experience making applications with them, so maybe I could contribute with that. BostonGene developed a machine learning algorithm named Kassandra that they used to research tumor microenvironments! And it's available on GitHub!!!
 
 At first I was like "Maybe I could try recreating the project by training Kassandra myself using some publicly available datasets!" because those are two big things people like seeing - experience with handling big data, and doing cool machine learning stuff. But training ML models requires computing resources I don't have. I just have a laptop. It's a newer Lenovo and I love it, but I would need a supercomputer.
+
+> Note: I would later find out that you do not need a supercomputer to train a Kassandra model locally.
 
 I think what I should do is just use Kassandra. I can try to find some publicly available datasets of bulk RNA-seq data from tumor samples, and then use Kassandra to analyze them and see what insights I can get about the tumor microenvironments. That way, I can show that I know how to use ML tools in a real-world context, and also contribute to cancer research in some small way.
 
@@ -62,7 +65,7 @@ Turns out the page also has a 'Tool' tab where I can actually use the Kassandra 
 
 Another important thing to note. Kassandra is designed to predict the cellular composition of a tumor sample (or blood sample, because I think the researchers actually made two models of Kassandra in the study, one for blood and one for tumors). But I was wondering if Kassandra was trained to work with only one TYPE of tumor. But here's an important line from the study:
 
-"A collection of more than 18,000 bulk RNA-seq, covering numerous immune and stromal sorted cell populations and cancer cell lines, was curated using the GEO and ArrayExpress databases (Barrett et al., 2012). The raw RNA-seq datasets were combined, homogeneously annotated, and bioinformatically recalculated for comparable measurements of transcript expression within each cell type to reduce batch effects. After quality control, well-defined cell clusters were revealed, populating the Kassandra sorted cell compendium with purified RNA-seq samples (n = 9,404) of diverse immune and stromal cell populations, including malignant cells from 24 cancer types (n = 2,166) (Figures 1B, S2A, and S2B)." (Fowler, et al., 2022)
+"A collection of more than 18,000 bulk RNA-seq, covering numerous immune and stromal sorted cell populations and cancer cell lines, was curated using the GEO and ArrayExpress databases (Barrett et al., 2012). The raw RNA-seq datasets were combined, homogeneously annotated, and bioinformatically recalculated for comparable measurements of transcript expression within each cell type to reduce batch effects. After quality control, well-defined cell clusters were revealed, populating the Kassandra sorted cell compendium with purified RNA-seq samples (n = 9,404) of diverse immune and stromal cell populations, including malignant cells from 24 cancer types (n = 2,166) (Figures 1B, S2A, and S2B)." (Zaitsev et al., 2022)
 
 Look at me, citing my sources. So it looks like Kassandra can work with multiple cancer/tumor types! I'm hoping the data that I find to plug into Kassandra will be compatible in this way.
 
@@ -91,8 +94,6 @@ Just to recap... I'm trying to get from a raw tumor sample to the valuable knowl
 ### How Anyone Can Get RNA-Seq Data
 
 First of all, let's research how BostonGene got and used their RNA-seq data.
-
-From the study: "A collection of more than 18,000 bulk RNA-seq, covering numerous immune and stromal sorted cell populations and cancer cell lines, was curated using the GEO and ArrayExpress databases (Barrett et al., 2012). The raw RNA-seq datasets were combined, homogeneously annotated, and bioinformatically recalculated for comparable measurements of transcript expression within each cell type to reduce batch effects."
 
 Basically, they got a bunch of data from the GEO and ArrayExpress databases, then they used those in the *training Kassandra* part. So I guess I could use those databases to get RNA-seq data too? Maybe I should get my sample from a different database?
 
@@ -285,6 +286,14 @@ Let's check out the files in the text editor!
 
 This is the output we need to plug into Kassandra - a TPM gene expression matrix.
 
+**CORRECTION:** Ok so this is NOT a TPM gene expression matrix. This is *transcript-level*. It's a list of the abundance of each *transcript* in the sample. I think this makes sense because when I think about it, we're literally feeding cracked RNA strands into this algorithm, like broken up sentences, and Kallisto just turns it into the individual words it's supposed to be saying. Each transcript corresponds to a parent gene, sometimes different transcripts can have the same parent gene.
+
+So this is *transcript-level*. We need to turn this matrix into a gene-level expression matrix. 
+
+**KASSANDRA DOES THAT.** It takes a transcript-level matrix and turns it into a gene expression matrix *itself*. Then THAT goes into the algorithm part.
+
+I would later figure this out from the programming part of the project. Looking into the core of the Kassandra code reveals a bunch of utility functions that do this exactly.
+
 ### Using Kassandra
 
 We're finally here! Unfortunately, I can't use the online Kassandra tool because it's down for maintenance. And... what I thought was a "baby Kassandra" model on the GitHub was actually just a notebook that's used to TRAIN Kassandra... from scratch. Also it's the BLOOD model, not the tumor model!
@@ -299,13 +308,6 @@ For now, though, I wanna review what I've done and learned so far. There's a con
 
 Basically what I have so far is the file I need to plug into Kassandra. It's `abundance.tsv`, in the SRR36909580 directory.
 
-## LinkedIn Post
-
-BostonGene is pioneering the integration of predictive modeling in clinical research. This is important because it "will lead to an improved understanding of the tumor microenvironment, which is a critical factor in cancer pathogenesis, clinical outcome, and therapeutic resistance" (BostonGene, 2026). Kassandra, a machine learning-based algorithm that predicts the cellular composition of tumor samples from bulk RNA-seq data, is BostonGene's novel contribution to stepping oncology research forward.
-
-I've illustrated the pipeline of data that researchers use to generate raw tumor RNA samples into a generated reconstruction of the TME in an easy-to-understand format, and tested the programs used to normalize and extract knowledge from the data. My findings include [fill in after testing Kassandra].
-
-Could predictive modeling become the industry standard for clinical research? I'd love to see it happen first-hand.
 
 ## Outside Of The Project
 
@@ -428,7 +430,7 @@ Ok, a few days later. I'm about to activate the conda and run the training scrip
 
 **CORRECTION:** *I'm training the model on the same dataset that the production model used in its paper.* That dataset is the *cell profiles* of thousands of samples from patients with tumors, which are sorted cells. *There aren't separate models.* **THE THING THAT CHANGED** is how many artificial transcriptomes are generated on my computer *right now*.
 
-**CORRECTION TO THE CORRECTION:** There *are* separate models. 
+**CORRECTION TO THE CORRECTION:** There *are* separate models. When you 
 
 
 
@@ -498,11 +500,17 @@ Which is fine. That just means I can't do that type of plot for this sample. Um,
 
 ## Results
 
-I got a couple plots from using the provided example datasets. So that's something.
+1. I got a couple plots from using the provided example datasets. 
+
+So that's something. This actually verifies that my model works. So I guess this just completes the *technical* part of the project.
+
+2. I got a *cell composition % table* from running Kassandra on my own dataset. 
+
+This is the part that tests the *oncological* outcome of the project. I need to use this to demonstrate how this *helps*. Like I've got the data, sure, but what do I even do with it?? I feel like I need to be a doctor myself to truly complete this part of the project - maybe that's just perfectionism, but at the same time, I have no idea what most of these words and acronyms mean. 
 
 ### FOINALLY posting this thing
 
-I want to FINALLY POST THIS REPO. I shoulda posted it a while ago! But now I've got a **RESULT** from the thing and I can talk about it.
+I want to FINALLY POST THIS REPO. I shoulda posted it a while ago! But now I've got **A RESULT** from the thing and I can talk about it.
 
 So what I'm going to do is post 
 - this log,
@@ -525,3 +533,132 @@ So every project (PRJNA) can have multiple BioSample specimens (SAMN), one speci
 
 Anyway maybe I could take these other samples (if they’re very similar, since they’re in the same project), run them through the pipeline, and plot their results together to display something useful.
 
+
+
+(8/30)
+
+So now that I've finally posted something I can show and talk about, let's make that LinkedIn post. I made a section about it a while ago after I did the Kallisto step - I'll just move it here.
+
+## LinkedIn Post
+
+BostonGene is pioneering the integration of predictive modeling in clinical research. Kassandra, a machine learning-based algorithm that predicts the cellular composition of tumor samples, is their novel contribution to stepping oncology research forward.
+
+I've illustrated the pipeline of data that researchers use to generate raw tumor RNA samples into a generated reconstruction of the TME in an easy-to-understand format, and tested the programs used to normalize and extract knowledge from the data. My findings include [fill in after testing Kassandra]. The work by @NathanFowler and the BostonGene team inspired me to complete this project.
+
+Could predictive modeling become the industry standard for clinical practices? I'd love to see it happen first-hand.
+
+> #Oncology #MachineLearning #BostonGene #Research
+
+
+
+(9/4)
+
+## Studying oncological background
+
+I guess I should start from the ground up.
+
+This whole program was started to help doctors choose a therapy method for patients with tumors. Right?
+
+I studied this interview by **Alexander Bagaev**, Chief Product Officer at BostonGene. When asked about the history of BostonGene, he said it started with a brainstorm session to figure out what they needed to study in order to accurately diagnose tumor patients with a treatment therapy that *doesn't not* help.
+
+He also said a bunch of other cool things that I'm excited to talk about with him like how he's deciding which patients are good to test drugs on, the other benefit of BostonGene's products. And also the **interpretation disconnects** between physicians and hospitals!
+
+---
+
+**PERSONAL NOTE**
+
+I sent another email to Dr. Fowler updating him on my progress/status. He finally responded!!! He said my project is impressive and told me he's getting in touch with Dr. Bagaev. DUDE THIS IS AWESOME!!!!!!!!!
+
+So I did a bunch of research into Dr. Bagaev's background, his role/history, his research papers, and all that good stuff. This interview came up on LinkedIn - they turned some parts into little Instagram-esque clips.
+
+His background is super impressive too. He wanted to be a theoretical physicist at first (very cool, because I study quantum info theory), graduating in Moscow in physics, and aspired to apply math to biology to help healthcare. He joined the company early when there were only 10 people; it started as a cloud-based company that did "dry labs", just handling raw data and researching how to best make use of it for healthcare. He's seen many parts of BostonGene's operations; he was a bioinformatics analyst, then a team lead, then worked his way up all the way to CPO. 
+
+---
+
+So anyway, BostonGene aims to use multimodal data to develop both *drug development* and *clinical diagnoses*. The diagnostic space is, quote, "cumbersome", because apparently hospitals that receive BostonGene's products *don't fully understand* how to *interpret their results* as useful knowledge.
+
+**That's what I'm focusing on here.** How can I interpret the cell composition % table I got from Kassandra? What is it telling me? How would I get from that to a favorable treatment modality?
+
+Well. I'm looking at something very specific here. I'm not a doctor or an oncologist.
+
+But hey I'm 24 and I have today off from JCPenney.
+
+So let's start from scratch. BostonGene wants *drug development* insights and *clinical diagnosis* insights. Let's study the diagnosis part.
+
+...
+
+Watched "Principles of Cancer Treatment" on YouTube (9 years ago). Great! Very general idea acquired.
+
+Ok lemme slow down. Now that I think about it... it wouldn't make *sense* for me to be able to select the "correct" treatment modality from *THIS* point, where all I have to make this decision is the predicted cell composition of the tumor. Treatment selection has lots of different factors to consider based on the tumor, the patient, and the many different available treatment options.
+
+So... what now? 
+
+
+(9/10)
+
+All right so BostonGene just presented two new abstracts at SOHO 2026, a conference here in Houston. Wish I coulda been there (I totally woulda helped them set up their booth or whatever they needed but it costs 100 bucks to get in). One of the abstracts was an **actionability score for targeted therapy selection**. 
+
+DO YOU KNOW WHAT THAT MEANS!?!? IT MEANS THEY'RE DOING THIS WHOLE ENTIRE THING!!!! They made programs for genetic classification and cell composition prediction, and now they're making the framework for **HOW TO USE THIS INFORMATION** in clinical settings.
+
+I think that's what BostonGene is focusing on right now. Making a *framework* for how to get from what they have to **what it means** and **what they should do about it**. 
+
+I'm writing this because I'm trying to mentally prepare for my meeting. There's a central question I'm faced with. *What am I interested in about BostonGene?* (I'm overthinking a little bit here because I'm nervous.) I'm interested in the research and bioinformatics part of their work. 
+
+So how would I contribute to that? Realistically, all I've done so far is *use* their product. How would I take it forward?
+
+I originally wanted to improve the algorithm somehow by making it a hybrid quantum-classical approach. But I don't think this is the kind of project that needs that. Like, *what part* would I apply it? I read their original Kassandra paper.
+
+I think the best thing I can do right now is continue the project. I gotta confirm the m6a thing, then do the other samples, then plot them in some way. Also I can research what the percentages of cells can actually tell us once I have the plots.
+
+
+(9/11)
+
+## Project Part II - Electric Boogaloo
+
+Ok so the main goal is to get the rest of the SRA database samples (from the same project) plugged in to the same pipeline I did with the original sample I chose. The cool part that I didn't see before is that there's *control* samples and *IL8* samples, so **the LEAST we can get from this project is a comparison of the tumor microenvironment cell composition before and after IL8 blockade treatment**.
+
+That means I'm gonna have to download a buuuuuunch more GB of data (that probably exceeds my laptop's 1TB storage). No problem, though. I can trash whatever I don't need anymore after processing. I'm just gonna have to do it all in batches.
+
+### Verifying the data (annoying)
+
+There was an issue Claude caught with the type of library the experiments are using to read data from, so I wanna explain why it's significant.
+
+> The issue: "Is this data really an RNA-seq read of a tumor sample, or is it something else?"
+
+I recently learned that the NIH SRA database is a lot more comprehensive than I thought when I first used it to get my sample. As I wrote earlier, it connects whole projects, their experiments, their samples, and the runs used to measure the sample data. The point of conflict here was the "Library" section of the experiment and its details. Here's some more context!
+
+**Next-generation sequencing (NGS)** is an advanced laboratory test that reads the genetic information of a tumor sample. That's what the HiSeq X Ten machine does, and that's how we get from a tumor sample to an RNA-seq read which we can use (in bulk) to study the tumor's mutations and stuff.
+
+The information that the sequencing gives you **DEPENDS ON THE LIBRARY YOU PREPARE FOR IT.** A **library** in an NIH SRA project experiment is a collection of DNA or RNA fragments collected from the biological sample you want to study. So the library is LITERALLY the **physically prepared** sample. You can't really say "sample" and "library" interchangeably because the sample gets prepared and *becomes* a library. Annoying lab lingo.
+
+- The "physically prepared" part is super important here. That's preparing the library. Earlier I was confused if a library was some outside reference that the machine used to map the molecules read from the sample to some set of genes. Then I convinced myself that the sequencing machine (HiSeq X Ten) was the thing that selectively scanned the input sample's DNA/RNA strands based on that reference. ***Nope!*** The HiSeq X Ten is gonna read whatever molecules are put in it. *How you prepare the sample* determines *what goes into the machine* and therefore *what data is collected*. 
+
+There are a few different ways to prepare a library. 
+
+The SRA `PRJNA1405960` project used **PCR (polymerase chain reaction) selection**. I read this Thermo Fischer Scientific article about the different types of sequencing, and PCR was in there as a type of *targeted sequencing*. BostonGene mentioned using switching from whole genome sequencing (WGS) to this in order to study the TME and see what the tumor is immune/resistant to; it doesn't require inputting the whole genome, so I figured this was a method of narrowing the input data. The way I understood it, I thought this was a type of "data filtering" method that only focused on the select molecules in the tumor sample.
+
+***************Nope!***************
+
+PCR is just copying DNA.
+
+PCR IS JUST. COPYING. DNA. We're just duplicating the stuff so we have more of it. BRUH
+
+ So really, it doesn't do anything for the project but make the sequencing machine more accurate. It didn't select only certain parts of the transcriptomes, and it didn't filter any genes or other data out. It just made the whole sample a little clearer - I imagine PCR happens a lot in these types of experiments where you're handling DNA/RNA. Jesus it took ONE google search - "what does pcr amplification do" - and it all clicked.
+
+So the **REAL** answer for "is this library really giving pure tumor sample data" lies in more than just the `Selection: PCR` field. The "Library" section of the experiment page tells you a lot more about how the sample is used. The "Selection" field **IS NOT TARGETED SEQUENCING!!!** It just tells you *how the researchers isolated, filtered, or captured the subset of DNA/RNA that actually ended up in the sequencing machine.
+
+I'm sure I wrote this earlier, but here it is again. The "Strategy" field is telling us that we're getting normal RNA-seq data. Other strategies *would* filter data out, but this is simply scanning the entire library for every single cracked RNA strand it contains. Just like what an RNA-seq file is supposed to be. The "Source" field also says `TRANSCRIPTOMIC` so that tells us this gives us transcriptome-level data (again, exactly what we need for Kassandra).
+
+**CONCLUSION:** I just had to make sure this was normal bulk RNA-seq data. ****It is.**** The "Strategy" and "Source" fields of the library confirm it.
+
+I just confused myself because I wasn't sure what "library" meant, then I read an article about it and thought the Selection field was a *wayyyyy* bigger problem than it actually is.
+
+### Useful info
+
+The samples were actually *ex vivo*, meaning treatment was done to tumors in a lab, not in a patient directly. Really interesting! Oh btw [here's the DOI](https://doi.org/10.1158/1078-0432.CCR-25-4384) for their study.
+
+**Side note:** Just thought of something. I should make bar graphs for the actual cell composition datasets of all of BostonGene's provided examples. This'll give me a good idea of what the cell composition should generally be in a tumor sample. 
+
+### I'm going crayyyzaayyyyyy
+
+So now I gotta do the same thing I did with my first sample **26 more times**.
