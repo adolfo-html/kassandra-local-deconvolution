@@ -210,6 +210,8 @@ I ran `fasterq-dump --version` to check that it was installed correctly. It said
 
 First, though, we need to download the SRA file. That's `prefetch`. It needs the **SRR accession number**, which is `SRR36909580` for our data.
 
+> **Important:** It's 9/12 and I just caught that the SRR accession number is just the run number. It's not like a special passcode or anything, just a unique ID.
+
 Here's what's gonna happen now: I'm going to download the file with prefetch. Then I'm gonna convert that file to fastq (unless it already is fastq?) with `fasterq-dump`. THEN, I'll have the exact same type of data that was used in the [initial study](https://ega-archive.org/datasets/EGAD00001008776) - bulk RNA-seq data from a tumor sample in fastq format!
 
 #### Prefetch Download
@@ -657,8 +659,166 @@ I just confused myself because I wasn't sure what "library" meant, then I read a
 
 The samples were actually *ex vivo*, meaning treatment was done to tumors in a lab, not in a patient directly. Really interesting! Oh btw [here's the DOI](https://doi.org/10.1158/1078-0432.CCR-25-4384) for their study.
 
-**Side note:** Just thought of something. I should make bar graphs for the actual cell composition datasets of all of BostonGene's provided examples. This'll give me a good idea of what the cell composition should generally be in a tumor sample. 
+**Side note:** Just thought of something. I should make bar graphs for the actual cell composition datasets of all of BostonGene's provided examples. This'll give me a good idea of what the cell composition should generally be in a tumor sample.
 
-### I'm going crayyyzaayyyyyy
+---
 
-So now I gotta do the same thing I did with my first sample **26 more times**.
+### SOHO 2026
+
+Oh my god I'm here. I spoke to a couple different booths! But **BOSTONGENE ISN'T HERE.** They basically just presented their abstract on September 9 and left.
+
+***NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!***
+
+It's fine, I can still network. I spoke to a couple different people (the people at Sumitomo Pharma were super chill and offered to connect me to an MD) and got some pamphlets and papers and water and snackies.
+
+I got an Insider magazine that has a copy of the SOHO program, as well as articles explaining the central topics. Super useful - will come back to this later.
+
+I think I'm throwing people off by being here. Sometimes people think I'm younger than I am. And I don't have a nametag, which everybody else has. And, obviously, I talked to the booth presenters and they explained their, uh, stuff to me, and I listened, and *really, genuinely tried* to understand and ask good questions. I tried. But again I'm not a doctor.
+
+But: #gameisgame
+
+**Bristol Myers Squibb** had a booth with some interactive touchscreens showing their commercial/research stuff. What I saw interested me. I can't remember the specifics right now but they had the words "target" and "protein" in it. Excuse me??? Did you say *quantum*??? I'd love to see if I can apply it there. An ambitious long shot, but quantum computing is super interesting to me and I wanna get involved there somehow. Maybe I can do a project on their products too.
+
+*I FOUND THE PRESENTATION ROOM!* It's an auditorium and a bunch of doctors are presenting their studies. I'm seeing some familiar names - Dr. Chamoun's name is in a presentation's citation, I met him at the TMC AI Summit.
+
+Terms that keep getting repeated that I should probably keep in mind:
+- CAR T cells
+- Therapy selection
+- Liso-cel
+- BTK degraders
+
+I liked Dr. Westin's presentation - he, as well as most other presenters, targeted the question of how to select therapy modalities in his presentation. I tried talking to him about it - I introduced myself and started asking. But he was trying to listen to the next presenting speaker, and he told me to send him an email. I sent him a LinkedIn request.
+
+The connection to the Sumitomo Pharma presenter made it worth it - not only did he offer me a referral, he *encouraged* me. I should follow up with him; we're connected on LinkedIn now!
+
+---
+
+### Preparing to use Kassandra (again)
+
+Let's run a couple more tumor samples through Kassandra so we can compare the IL8 and control groups!
+
+**Run Selector** is cool. It's a feature on the NIH SRA database that lets you find all of the runs that were collected in a select project. You go to the BioProject's page, then in the "Project Data" section, click on the number of links for SRA experiments. That'll take you to the page displaying a list of experiments for the project, which has a "Send to..." dropdown in the top right. Use that to send it to the Run Selector!
+
+The Run Selector displays pretty much all the info for all the runs. The thing I'm looking for here is how I'm going to notate and organize my data. I'm thinking I'll download the sample pairs they named as "Sample 1", "Sample 2", and "Sample 3". So I'm using the `Sample Name` column to decide which samples I'm downloading.
+
+The **control samples** I'll download are:
+
+| Sample Name | Run ID | Experiment ID | File Size |
+| -------- | -------- | -------- | -------- |
+| S1  | SRR36909605 | SRX31879927  | 1.83 Gb |
+| S2  | SRR36909593 | SRX31879939  | 1.89 Gb |
+| S3 | SRR36909585 | SRX31879947 | 1.84 Gb |
+
+
+The **IL8-blockade-treated samples** I'll download are:
+
+| Sample Name | Run ID | Experiment ID | File Size |
+| -------- | -------- | -------- | -------- |
+| S1_IL8  | SRR36909604 | SRX31879928 | 1.84 Gb |
+| S2_IL8  | SRR36909586 | SRX31879946 | 1.87 Gb |
+| S3_IL8 | SRR36909584 | SRX31879948 | 1.88 Gb |
+
+I'll start with these. Gonna see how long it takes. Will trash all the input after I get the Kassandra cell composition % prediction, because again, space.
+
+Downloaded SRA Toolkit - the compiled binaries from GitHub. Added the extracted `bin/` folder to PATH.
+
+> **Important:** When I downloaded kallisto last time, I didn't download it in the right place. When I install a command line program, I want to be able to use it from anywhere. What happened last time was I extracted the program in my Documents folder and didn't add it to my PATH properly (The PATH environment variable lets you use programs without having to navigate to the directory that the program is in). So I ended up moving all the files to the folder WITH the program and running it that way. *Obviously that's kind of annoying.* So here's what I'm doing THIS time: I made a folder called `tools` in my user folder, and extracted the sratoolkit compiled binary .zip into THAT folder. THEN: I added the `bin` folder's path to my PATH environment variable. That worked.
+
+> And you can do the same thing with kallisto!
+
+Downloaded kallisto compiled binaries from the Patcher lab Downloads page. I got the program from bin and moved it straight into the `tools/` folder. Added the `tools/` path to PATH. (It's a single .exe file, so it's fine if I don't have it contained in a folder like all the SRA Toolkit .exe's.)
+
+Downloaded the index - `kallisto_hg38.idx`. I had to use one of my limited authenticator codes. I tried signing in with my Google account but idk where it sent the 2fa code. Whatever. Not like I'm gonna download it 9 more times...
+
+Now I've got everything I need to download my data. Hold on, lemme organize everything...
+
+### Organizing everything
+
+Here's how I'm structuring this part of the project. My local `runs/` folder is where I'm going to be downloading the data with prefetch. I'm converting these to fastq files *in the same folder* with fasterq-dump. I'll then run them through kallisto to store the resulting TPM transcript matrices. **This step** is going to make an output folder with the abundance.tsv we need to plug into my `predict_kassandra.py` script. I think I might have to make a modification to the predict script to put the output (cell deconvolution) in the `output/` folder. Nope it already does that I just have to make it a dynamic filename using the unique SRR ID
+
+- I'm making the `runs/` folder locally, and I won't upload them because again I'm trashing these when I'm done with them. The idea is to do all of this in one location so that I don't have to move gigabytes of files around! I'm NOT DOING ANY OF THIS WORK IN THIS REPO. After I'm done I'll copy over the updated script, then move the deconvolutions to this output/ folder.
+
+- Also I'm going to store the kallisto_hg38.idx index file in a folder in the other repo called `index/`.
+
+Oh... I forgot running Kassandra needs both the preprocessing data and core/... **so HEY YOU, do this in the Kassandra-modified folder.**
+
+So it's constantly keeping the run ID through every command and it works in its own folder. Therefore, no problem mixing up abundance files or anything!
+
+Two changes to predict_kassandra.py: Allow passing the run number as an arg, and put output in output/, **oh and also** make sure it's not overwriting to deconvolution_percentages.tsv *every time*, because right now it's just `preds_df.to_csv('output/deconvolution_percentages.tsv')`. Once we pass args we can use that to name the outputs accurately. Cool!
+
+I'll probably also make a .bat file that does this whole thing for one run. I'll run one sample manually so I can document the commands are right, then write the .bat.
+
+### Replicating the download -> deconvolution process
+
+So let's start with "S1" - our first control sample!
+
+Now running `prefetch SRR36909605` **IN THE RUNS/ FOLDER**.
+
+It makes a folder with its SRR ID in runs/. Awesome.
+
+Running `fasterq-dump SRR36909605/SRR36909605.sra --progress` **ALSO IN THE RUNS/ FOLDER**. This made the fastq files in runs/ instead of the SRR~/ folder. Ok, so I guess in the future I should go in the SRR folder for this step.
+
+Running `kallisto quant -i C:\Users\adolf\Desktop\Kassandra-modified\index\kallisto_hg38.idx -o output SRR36909605_1.fastq SRR36909605_2.fastq` after moving those files into the SRR folder **and navigating into it**.
+
+All right so where the files are being made is a big deal here, well, to me, because I wanna organize this whole thing. Running kallisto gave its results in an "output" folder, but I'm gonna rename it to SRR36909605_quant to indicate that this is the kallisto output. This'll be automated in the .bat as `%SRR%_quant`.
+
+Oh... I forgot we need to run our python script in conda. Can we automate that...? *Yes, we can.* I manually activated the conda environment in Anaconda Prompt and ran the predict from there just now, but automating it involves stating the path to the conda environment's `python.exe` and using that to run in the .bat.
+
+### Automating the the download -> deconvolution process
+
+All right! Now that we've got the whole process, we can make our .bat.
+
+The paths are the main issue here. Once I upload it I'm gonna specify to change specific path names.
+
+Let's test it out on "S2", the next control sample.
+
+Ok so in the Kassandra-modified repo, I actually didn't put my python scripts in a scripts/ folder, so it failed on that step. But I went to the Anaconda Prompt and did it manually again because the rest of it worked. Fixed the .bat. I'm sure the placement/paths issue will fix itself once I copy over my changes.
+
+~~I'm also manually renaming my deconvolution files to add the sample names at the beginning of their names. So I can know what I'm plotting later!~~ Oh you know what, why don't I just get that **giant table of sample run data from the Run Selector?** Ok I downloaded it in a csv, all fields are separated by commas, so that's what I'll use to plot/sort/name data later.
+
+So let's test this .bat version on S3.
+
+Perfect it worked! It put everything in the right spots and it removed the big fastq and sra files I don't need anymore.
+
+### Making a plotting script
+
+I wanna plot this data after I get the rest of the samples processed. Right now I'll just try plotting the percentages of the first 3 samples.
+
+**What to plot:** I'm assuming all I have to plot is the cell percentage of each type of cell in the samples.
+
+BostonGene's first example performance validation dataset, GSE107572, plotted only 7 of the types of cells in their .yaml file. I want to plot all possible types, so that interpreters of this project's results aren't missing anything.
+
+> Note: Some of the objects in cell_types.yaml are part of other objects. Like for example the percentage of Lymphocytes can be plotted as the sum of B_cells, T_cells, and NK_cells percentages. BostonGene did this in their validation plots.
+
+So here's the leaf nodes in the tree of cell types, which I'll include in my plots!
+- NK_Cells
+- Monocytes
+- Macrophages
+- Endothelium
+- Non-plasma_B_cells
+- Plasma_B_cells
+- ~~Granulocytes~~ (Removed in fork)
+- CD4_T_cells
+- CD8_T_cells
+- ~~Dendritic_cells~~ (Removed in fork)
+- Fibroblasts
+
+The plots would be `Cell Type` (x-axis) vs. `Predicted Composition %` (y-axis).
+
+**How to plot it** is what I'm trying to figure out now. There's an optimal type of graph I need to create to display the information most effectively. 
+
+Maybe a bunch of little paired bar charts, one for each sample pair? Because I've got 7 different groups of cells I'm plotting, and they're all mutually exclusive, so lines aren't the play. It would be helpful to pair *one sample's* control and IL8 together directly, to clearly and directly see any differences.
+
+Not sure how to plot *all* of the data in one graph. Maybe I don't need to.
+
+What I *do* know is slope charts look cool. Maybe that would work for all of the data? Left would be control percentages, right IL8 percentages. Then the lines would be color-coded based on cell type, and the slopes would indicate the change. Damn am I becoming smart?
+
+### Plotting the Kassandra tables for 3 pairs of samples
+
+So I ran a quick plotting script Claude made and they're verrrry similar. The problem ended up being which column of the deconvolution.tsv table it was selecting from. I changed `iloc[:, 0]` to `iloc[:, 3]`, and it worked like a charm!
+
+*Now* we have plots displaying a *real difference* in clear cell renal cell carcinoma tumors before and after being treated with IL8 blockade.
+
+The script still has some issues I'm trying to fix. 
+
+Also I still need to download the rest of the data.

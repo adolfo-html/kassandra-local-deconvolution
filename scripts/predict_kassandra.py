@@ -5,6 +5,12 @@
 import pickle
 from pathlib import Path
 
+
+# Collect the SRR ID from the command line argument
+import sys
+srr = sys.argv[1]
+
+# Load the trained model from models/
 model_path = Path('models/tumor_model.pkl')
 with open(model_path, 'rb') as f:
     model = pickle.load(f)
@@ -25,7 +31,9 @@ from core.utils import *
 # Model prediction with datasets
 
 # First, we have to convert transcripts to genes
-expr = pd.read_csv('input/abundance.tsv', sep='\t', index_col=0)
+expr = pd.read_csv(f'{srr}/kallisto/abundance.tsv', sep='\t', index_col=0)
+expr = expr[['tpm']]        # keep only TPM
+expr.columns = [srr]        # name the column after the run
 expr = tr_to_genes(expr, tr_ids_path='data/tumor_model_transcripts.txt')
 expr = renorm_expressions(expr, 'data/genes_in_expression.txt')
 
@@ -35,8 +43,8 @@ preds.loc['Lymphocytes'] = preds.loc[['B_cells', 'T_cells', 'NK_cells']].sum()
 preds.loc['Stromal'] = preds.loc[['Endothelium', 'Fibroblasts']].sum()
 preds_df = pd.DataFrame(preds)
 
-# Save results
-preds_df.to_csv('output/deconvolution_percentages.tsv', sep = '\t', header = True, index = True)
+# Save results to output/ folder with SRR ID name
+preds_df.to_csv(f'output/{srr}_deconvolution.tsv', sep = '\t', header = True, index = True)
 
 
 

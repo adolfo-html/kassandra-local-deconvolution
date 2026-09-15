@@ -20,7 +20,7 @@ I cloned jsangalang's [Kassandra-modified](https://github.com/jsangalang/Kassand
 
 ## Results
 
-Running the prediction script using a trained model yields a cell percentage table .tsv file representing the predicted ratio of each cell type in the tumor microenvironment, which can be compared with actual values for an analysis of accuracy.
+Running the prediction script using a trained model yields a cell percentage table .tsv file representing the predicted ratio of each cell type in the tumor microenvironment.
 
 Using the program with the "GSE107572" example dataset (provided by Kassandra) yielded a plot to validate performance and data correctness:
 
@@ -29,7 +29,13 @@ Using the program with the "GSE107572" example dataset (provided by Kassandra) y
 ![Plots of the individual cell types](/results/Figure_2%20from%20test_kassandra.png)
 
 
-Using the program with a dataset outside of the provided ones generated the cell composition .tsv. However, **actual cell content was not provided** for this sample. So I'm actively continuing this project to plot other data in lieu of that - will probably use the other samples from the same source project, and plot something useful from those.
+Using the program with tumor samples from an outside project (from NCBI BioProject PRJNA1405960, sourced from Dong et al., *Clin Cancer Res* (2026) 32 (9): 1860–1873, DOI: [doi:10.1158/1078-0432.CCR-25-4384](https://doi.org/10.1158/1078-0432.CCR-25-4384)) generated the predicted cell % .tsv's. However, **actual cell content was not provided** for these samples.
+
+After deconvolution of a subset of these pairs (n=3), I was able to generate plots comparing predicted cell %s:
+
+![Comparison of predicted cell %s before vs after IL8 treatment in ccRCC, ex vivo](results/091526_split_bars.png)
+
+These compare predicted TME composition between IgG control and IL-8 blockade in the same tumors. 
 
 ### Limitations
 
@@ -38,6 +44,8 @@ The full publication model generates artificial transcriptomes in training. I re
 The "Dendritic_cells" and "Granulocytes" cell types are not present in the training data. The fork removes these from the deconvolution, so they are not shown in the results.
 
 The results are specifically for the *tumor* model.
+
+Given that the experiments used samples *ex vivo*, interpretation of the results may not be accurate to *in vivo* (actual clinical practice).
 
 ## Process
 
