@@ -815,10 +815,30 @@ What I *do* know is slope charts look cool. Maybe that would work for all of the
 
 ### Plotting the Kassandra tables for 3 pairs of samples
 
-So I ran a quick plotting script Claude made and they're verrrry similar. The problem ended up being which column of the deconvolution.tsv table it was selecting from. I changed `iloc[:, 0]` to `iloc[:, 3]`, and it worked like a charm!
+So I ran a quick plotting script Claude made and the predicted cell %s for each sample are the same, pretty much. The problem ended up being which column of the deconvolution.tsv table it was selecting from. I changed `iloc[:, 0]` to `iloc[:, 3]`, and it worked like a charm!
 
 *Now* we have plots displaying a *real difference* in clear cell renal cell carcinoma tumors before and after being treated with IL8 blockade.
 
-The script still has some issues I'm trying to fix. 
+The script still has some issues I'm trying to fix. The slope thing isn't really doing it for me. I have a gut feeling bar charts aren't a good way to depict before-and-after ratio changes side-by-side.
 
 Also I still need to download the rest of the data.
+
+
+
+(9/20)
+
+### Plotting the Kassandra tables for n=13
+
+I **FINALLY** downloaded all the data. That took a long time. I fell asleep in the middle.
+
+Ok so I'm plotting the data and here's what I'm noticing immediately.
+
+- "Other" is a BIG PORTION of the graph. That's the malignant part - the cancer cells.
+
+- There are 4 pairs that have a WAY bigger ratio of CD8_T_cells. This could be because the sample is smaller and contains less of everything else, and this is a normal amount. Or maybe this one actually *does* have a way bigger amount?
+
+- CD8_T_cells also had the greatest change between samples (~2% less when treated on average). NK_cells was close by. 
+
+- Endothelium and Fibroblasts had the greatest variability - the **change** in their predicted compositions before/after treatment were the most spread out.
+
+- 

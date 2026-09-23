@@ -10,13 +10,13 @@ This project was completed in its entirety on my Windows laptop. Microsoft Windo
 
 ### Dependencies
 
-I downloaded:
+I installed:
 - SRA Toolkit
 - Miniconda
 - Kallisto (precompiled binary)
 - Python
 
-I cloned jsangalang's [Kassandra-modified](https://github.com/jsangalang/Kassandra-modified) repo and used its programs and code to complete my project. I moved the relevant data files from the *official* Kassandra repo into this cloned repo.
+I cloned jsangalang's [Kassandra-modified](https://github.com/jsangalang/Kassandra-modified) repo and used its programs and code to complete my project. I moved the relevant data files from the [*official* Kassandra repo](https://github.com/BostonGene/Kassandra) into this cloned repo.
 
 ## Results
 
@@ -24,18 +24,32 @@ Running the prediction script using a trained model yields a cell percentage tab
 
 Using the program with the "GSE107572" example dataset (provided by Kassandra) yielded a plot to validate performance and data correctness:
 
-![Plot of Predicted cell % vs Actual cell % using custom trained model](/results/Figure_1%20from%20test_kassandra.png)
+![Plot of Predicted cell % vs Actual cell % using custom trained model](results/Figure_1%20from%20test_kassandra.png)
 
 ![Plots of the individual cell types](/results/Figure_2%20from%20test_kassandra.png)
 
+BioProject PRJNA1405960 is associated with **26** bulk RNA-seq reads of ex vivo **clear cell renal cell carcinoma (ccRCC)** tumor cultures. 
+> From NCBI SRA BioProject PRJNA1405960, sourced from Dong et al., *Clin Cancer Res* (2026) 32 (9): 1860–1873, DOI: [doi:10.1158/1078-0432.CCR-25-4384](https://doi.org/10.1158/1078-0432.CCR-25-4384)
 
-Using the program with tumor samples from an outside project (from NCBI BioProject PRJNA1405960, sourced from Dong et al., *Clin Cancer Res* (2026) 32 (9): 1860–1873, DOI: [doi:10.1158/1078-0432.CCR-25-4384](https://doi.org/10.1158/1078-0432.CCR-25-4384)) generated the predicted cell % .tsv's. However, **actual cell content was not provided** for these samples.
+Applying the same Kassandra pipeline to this data yielded the cell % prediction .tsv's. However, **actual cell content/cytometry was not provided** for these samples.
 
-After deconvolution of a subset of these pairs (n=3), I was able to generate plots comparing predicted cell %s:
+So when I found *that* out, I decided to look in a different direction to extract useful info from the data. I instead focused on the abstract from the BioProject, and how I can use this data to come to similar conclusions the researchers did. Or, at least, learn.
 
-![Comparison of predicted cell %s before vs after IL8 treatment in ccRCC, ex vivo](results/091526_split_bars.png)
+After deconvolution of the pairs of samples (n=13), I was able to generate plots placing predicted cell %s side-by-side:
 
-These compare predicted TME composition between IgG control and IL-8 blockade in the same tumors. 
+![Comparison of predicted cell % averages before vs after IL8 treatment in ccRCC, ex vivo](results/091726_fulldataset/split_bars.png)
+
+![Paired stacked bars of predicted cell %s before vs after IL8 treatment in ccRCC, ex vivo](results/091726_fulldataset/stacked_composition.png)
+
+These compare predicted TME composition between IgG control and IL8 blockade in the same tumors. Across the 13 pairs, **no cell type showed a consistent composition change under IL8 blockade**.
+
+![Delta in predicted cell % for each sample after IL8 treatment](results/091726_fulldataset/paired_deltas.png)
+
+**The referenced study's actual result** was that "ex vivo IL8 blockade alleviated CD8+ T-cell exhaustion and synergized with PD-1 inhibition to enhance antitumor immune responses" (Dong et al., 2026). They used **mass/flow cytometry and multiomics** to gather insights, which provided different information than analyzing the RNA-seq data. This study highlights that transcriptomic analysis methods reveal TME composition information in their scope, and the study requires a different, more holistic approach to analyze immune suppression and cell state.
+
+### Next questions
+
+Can people be allergic to IL8 blockade? How expensive is it? Quantitatively, how much more effective is the immune system against ccRCC after IL8 blockade treatment, and how much does it improve patient survival chances?
 
 ### Limitations
 
